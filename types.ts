@@ -16,6 +16,8 @@ export interface UserProfile {
   aadhaar: string;
   healthId: string;
   bloodGroup: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
   isPremium?: boolean;
   subscriptionPlan?: 'standard' | 'pro' | 'family';
   subscriptionExpiry?: string;
@@ -25,6 +27,7 @@ export interface MedicalProblem {
   id: string;
   condition: string;
   status: 'past' | 'present' | 'recovered';
+  isChronic?: boolean;
   onsetDate: string;
   endDate?: string;
   severity: 'mild' | 'moderate' | 'severe';
@@ -50,7 +53,7 @@ export interface Surgery {
   type: string;
   date: string;
   hospital: string;
-  surgeon?: string;
+  surgeon: string;
   outcome?: string;
 }
 
@@ -71,6 +74,13 @@ export interface TreatmentNote {
   category?: 'Consultation' | 'Follow-up' | 'Emergency' | 'Surgery';
 }
 
+export interface FamilyHistory {
+  id: string;
+  relation: string;
+  condition: string;
+  notableNotes?: string;
+}
+
 export interface Interaction {
   id: string;
   query: string;
@@ -85,6 +95,7 @@ export interface HealthRecord {
   surgeries: Surgery[];
   allergies: Allergy[];
   notes: TreatmentNote[];
+  familyHistory: FamilyHistory[];
   interactions?: Interaction[];
 }
 

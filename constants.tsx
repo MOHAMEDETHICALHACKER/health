@@ -24,7 +24,9 @@ export const ICONS = {
   CREDIT_CARD: <i className="fas fa-credit-card"></i>,
   UPI: <i className="fas fa-mobile-alt"></i>,
   BANK: <i className="fas fa-university"></i>,
-  SCHEME: <i className="fas fa-landmark"></i>
+  SCHEME: <i className="fas fa-landmark"></i>,
+  FAMILY: <i className="fas fa-users"></i>,
+  EMERGENCY: <i className="fas fa-phone-alt"></i>
 };
 
 export const STORAGE_KEY = 'health_shield_records';
