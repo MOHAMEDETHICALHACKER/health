@@ -1,4 +1,12 @@
 
+export interface GovernmentScheme {
+  id: string;
+  name: string;
+  benefits: string;
+  eligibility: string;
+  officialLink?: string;
+}
+
 export interface UserProfile {
   name: string;
   age: number;
@@ -8,21 +16,21 @@ export interface UserProfile {
   aadhaar: string;
   healthId: string;
   bloodGroup: string;
-  emergencyContact: {
-    name: string;
-    phone: string;
-  };
   isPremium?: boolean;
+  subscriptionPlan?: 'standard' | 'pro' | 'family';
   subscriptionExpiry?: string;
 }
 
 export interface MedicalProblem {
   id: string;
   condition: string;
-  status: 'past' | 'present';
+  status: 'past' | 'present' | 'recovered';
   onsetDate: string;
+  endDate?: string;
   severity: 'mild' | 'moderate' | 'severe';
+  treatment?: string;
   notes?: string;
+  applicableSchemes?: GovernmentScheme[];
 }
 
 export interface Medication {
@@ -31,8 +39,10 @@ export interface Medication {
   dosage: string;
   duration: string;
   frequency: string;
+  startDate: string;
+  instructions?: string;
   prescribedBy?: string;
-  sideEffects?: string;
+  status: 'active' | 'discontinued';
 }
 
 export interface Surgery {
@@ -41,6 +51,7 @@ export interface Surgery {
   date: string;
   hospital: string;
   surgeon?: string;
+  outcome?: string;
 }
 
 export interface Allergy {
@@ -48,6 +59,7 @@ export interface Allergy {
   substance: string;
   severity: 'low' | 'moderate' | 'high';
   reaction?: string;
+  firstObserved?: string;
 }
 
 export interface TreatmentNote {
@@ -56,6 +68,14 @@ export interface TreatmentNote {
   date: string;
   note: string;
   clinicName?: string;
+  category?: 'Consultation' | 'Follow-up' | 'Emergency' | 'Surgery';
+}
+
+export interface Interaction {
+  id: string;
+  query: string;
+  response: string;
+  timestamp: number;
 }
 
 export interface HealthRecord {
@@ -65,6 +85,7 @@ export interface HealthRecord {
   surgeries: Surgery[];
   allergies: Allergy[];
   notes: TreatmentNote[];
+  interactions?: Interaction[];
 }
 
 export interface ChatMessage {

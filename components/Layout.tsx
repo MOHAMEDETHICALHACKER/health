@@ -15,9 +15,9 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, onLo
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: ICONS.DASHBOARD },
     { id: 'records', label: 'Medical Records', icon: ICONS.MEDICAL },
-    { id: 'august', label: 'August AI', icon: ICONS.AI },
+    { id: 'schemes', label: 'Govt Schemes', icon: ICONS.SCHEME },
+    { id: 'shield', label: 'Shield AI', icon: ICONS.AI },
     { id: 'history', label: 'Search History', icon: ICONS.SEARCH },
-    { id: 'subscription', label: 'Premium Vault', icon: <i className="fas fa-crown"></i> },
   ];
 
   return (
