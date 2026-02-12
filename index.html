@@ -5,78 +5,117 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HealthShield AI</title>
+  
+  <!-- PWA & Mobile Optimization -->
+  <meta name="theme-color" content="#0A66C2">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Health Shield AI">
+  
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+
+  <!-- Core Scripts & Styling -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
   <style>
-    body { font-family: 'Inter', sans-serif; }
-    
-    .mesh-gradient {
-      background-color: #f8fafc;
-      background-image: 
-        radial-gradient(at 0% 0%, hsla(222, 47%, 11%, 0.05) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, hsla(222, 47%, 11%, 0.02) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, hsla(243, 75%, 59%, 0.05) 0px, transparent 50%),
-        radial-gradient(at 0% 100%, hsla(243, 75%, 59%, 0.02) 0px, transparent 50%);
-    }
-
-    .glass-dark {
-      background: rgba(15, 23, 42, 0.8);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .auth-card {
-      box-shadow: 
-        0 10px 15px -3px rgba(0, 0, 0, 0.1),
-        0 4px 6px -4px rgba(0, 0, 0, 0.1),
-        0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background-color: #fcfdfe; 
+      color: #0f172a;
     }
     
-    @keyframes pulse-soft {
-      0%, 100% { transform: scale(1); opacity: 0.8; }
-      50% { transform: scale(1.05); opacity: 1; }
+    .shadow-3xl {
+      box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.08);
     }
 
-    .pulse-glow {
-      animation: pulse-soft 3s infinite ease-in-out;
+    .shadow-4xl {
+      box-shadow: 0 45px 100px -25px rgba(0, 0, 0, 0.15);
     }
 
-    @keyframes slide-in-right {
-      from { transform: translateX(30px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    .animate-slide-in { animation: slide-in-right 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
-    
-    @keyframes popIn {
-      0% { transform: scale(0.95); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    .animate-pop-in { animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-    /* Custom Scrollbar */
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-    
-    .tab-slider {
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 20px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+
+    .animate-fade-in {
+      animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .animate-slide-in {
+      animation: slideIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    }
+
+    .animate-modal-pop {
+      animation: modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .animate-backdrop-fade {
+      animation: backdropFade 0.3s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes modalPop {
+      from { opacity: 0; transform: scale(0.9) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    @keyframes backdropFade {
+      from { opacity: 0; backdrop-filter: blur(0px); }
+      to { opacity: 1; backdrop-filter: blur(12px); }
+    }
+
+    .card-expand-transition {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    input, select, textarea {
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
   </style>
-<script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "@google/genai": "https://esm.sh/@google/genai@^1.37.0"
+  
+  <script type="importmap">
+  {
+    "imports": {
+      "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+      "react/": "https://esm.sh/react@^19.2.3/",
+      "react": "https://esm.sh/react@^19.2.3",
+      "@google/genai": "https://esm.sh/@google/genai@^1.37.0"
+    }
   }
-}
-</script>
+  </script>
 </head>
-<body class="mesh-gradient text-slate-900 overflow-x-hidden min-h-screen">
+<body class="overflow-x-hidden min-h-screen selection:bg-indigo-600 selection:text-white">
   <div id="root"></div>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        // Use a strictly relative path to sw.js to ensure origin consistency.
+        // We also use a try-catch pattern as many sandboxed environments like IDX or preview frames
+        // explicitly block Service Worker registration for security reasons.
+        navigator.serviceWorker.register('./sw.js')
+          .then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          })
+          .catch(err => {
+            // Log as warning rather than error to avoid cluttering consoles in restricted preview contexts
+            console.warn('ServiceWorker registration restricted in this environment:', err.message);
+          });
+      });
+    }
+  </script>
 </body>
 </html>

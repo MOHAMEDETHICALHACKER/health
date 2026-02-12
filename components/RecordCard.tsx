@@ -7,29 +7,46 @@ interface RecordCardProps {
   children: React.ReactNode;
   onAdd?: () => void;
   className?: string;
+  isLoading?: boolean;
+  loadingMessage?: string;
 }
 
-const RecordCard: React.FC<RecordCardProps> = ({ title, icon, children, onAdd, className = "" }) => {
+const RecordCard: React.FC<RecordCardProps> = ({ 
+  title, 
+  icon, 
+  children, 
+  onAdd, 
+  className = "", 
+  isLoading = false,
+  loadingMessage = "Analyzing..."
+}) => {
   return (
-    <div className={`bg-white rounded-[2.5rem] shadow-[0_4px_25px_-5px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden transition-all duration-300 hover:shadow-[0_25px_50px_-15px_rgba(0,0,0,0.08)] flex flex-col ${className}`}>
-      <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/40">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-2xl bg-white shadow-[0_4px_10px_-2px_rgba(0,0,0,0.05)] border border-slate-100 flex items-center justify-center text-indigo-600 text-xl transition-transform group-hover:scale-110">
+    <div className={`bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col relative overflow-hidden card-expand-transition hover:shadow-md hover:scale-[1.005] ${className}`}>
+      {isLoading && (
+        <div className="absolute inset-0 z-10 bg-white/80 backdrop-blur-[2px] flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+          <div className="w-10 h-10 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3"></div>
+          <p className="text-xs font-bold text-indigo-600">{loadingMessage}</p>
+        </div>
+      )}
+
+      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm">
             {icon}
           </div>
-          <h3 className="font-black text-slate-800 tracking-[0.05em] uppercase text-[11px]">{title}</h3>
+          <h3 className="font-bold text-slate-800 text-sm">{title}</h3>
         </div>
-        {onAdd && (
+        {onAdd && !isLoading && (
           <button 
             onClick={onAdd}
-            className="text-[10px] font-black text-indigo-600 hover:text-white transition-all bg-indigo-50 hover:bg-indigo-600 px-5 py-2.5 rounded-2xl uppercase tracking-[0.1em] flex items-center gap-2 group"
+            className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-indigo-50 transition-all"
           >
-            <i className="fas fa-plus-circle text-sm group-hover:rotate-90 transition-transform"></i>
-            Add Record
+            <i className="fas fa-plus"></i>
+            Add New
           </button>
         )}
       </div>
-      <div className="p-8 flex-grow">
+      <div className={`p-5 flex-grow ${isLoading ? 'blur-[1px]' : ''}`}>
         {children}
       </div>
     </div>

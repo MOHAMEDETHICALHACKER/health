@@ -30,3 +30,8 @@ export const ICONS = {
 };
 
 export const STORAGE_KEY = 'health_shield_records';
+
+// Security Constants
+export const MAX_LOGIN_ATTEMPTS = 5;
+export const LOCKOUT_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+export const OTP_EXPIRY_MS = 2 * 60 * 1000; // 2 minutes
