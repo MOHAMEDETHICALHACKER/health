@@ -1,8 +1,21 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { HealthRecord, MedicalProblem, GovernmentScheme, Reminder } from "../types";
+import { HealthRecord, MedicalProblem, GovernmentScheme, HospitalRecommendation } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+const withRetry = async <T>(fn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> => {
+  try {
+    return await fn();
+  } catch (error: any) {
+    if (retries > 0 && (error.status === 429 || error.message?.includes("429") || error.message?.includes("RESOURCE_EXHAUSTED"))) {
+      console.warn(`Gemini API rate limited. Retrying in ${delay}ms... (${retries} retries left)`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return withRetry(fn, retries - 1, delay * 2);
+    }
+    throw error;
+  }
+};
 
 export const analyzeHealthRecord = async (record: HealthRecord, query: string): Promise<string> => {
   const systemInstruction = `
@@ -20,7 +33,7 @@ export const analyzeHealthRecord = async (record: HealthRecord, query: string): 
   `;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await withRetry(() => ai.models.generateContent({
       model: 'gemini-3-pro-preview',
       contents: query,
       config: {
@@ -28,12 +41,85 @@ export const analyzeHealthRecord = async (record: HealthRecord, query: string): 
         temperature: 0.6,
         thinkingConfig: { thinkingBudget: 4000 }
       },
-    });
+    }));
 
     return response.text || "I'm sorry, I couldn't process your request.";
   } catch (error) {
     console.error("Gemini AI error:", error);
     return "I encountered an error while analyzing your health data.";
+  }
+};
+
+export const findBestHospitals = async (condition: string): Promise<HospitalRecommendation[]> => {
+  const searchPrompt = `Find the top 5 most highly-rated and specialized hospitals and medical centers for treating "${condition}" in India. 
+  Include their main location, what they are specifically known for regarding this condition, and provide official website links.`;
+
+  try {
+    const searchResponse = await withRetry(() => ai.models.generateContent({
+      model: 'gemini-3-pro-preview',
+      contents: searchPrompt,
+      config: {
+        tools: [{ googleSearch: {} }],
+      },
+    }));
+
+    const infoText = searchResponse.text;
+    const groundingChunks = searchResponse.candidates?.[0]?.groundingMetadata?.groundingChunks;
+    const sources = groundingChunks
+      ? groundingChunks
+          .filter((chunk: any) => chunk.web)
+          .map((chunk: any) => ({
+            title: chunk.web.title,
+            uri: chunk.web.uri
+          }))
+      : [];
+
+    const parsePrompt = `
+      Convert the following info into a JSON array of HospitalRecommendation objects.
+      Info: ${infoText}
+      
+      Schema:
+      {
+        "id": "unique-id",
+        "name": "Hospital Name",
+        "location": "City, State",
+        "specialty": "Why it is top-rated for this condition",
+        "highlights": ["Key feature 1", "Key feature 2"],
+        "rating": "e.g., 4.8/5 or NABH Accredited"
+      }
+    `;
+
+    const parseResponse = await withRetry(() => ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: parsePrompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              id: { type: Type.STRING },
+              name: { type: Type.STRING },
+              location: { type: Type.STRING },
+              specialty: { type: Type.STRING },
+              highlights: { type: Type.ARRAY, items: { type: Type.STRING } },
+              rating: { type: Type.STRING }
+            },
+            required: ["id", "name", "location", "specialty", "highlights"]
+          }
+        }
+      }
+    }));
+
+    const hospitals: any[] = JSON.parse(parseResponse.text || "[]");
+    return hospitals.map(h => ({
+      ...h,
+      officialLinks: sources.slice(0, 2)
+    }));
+  } catch (error) {
+    console.error("Hospital search failed:", error);
+    return [];
   }
 };
 
@@ -47,13 +133,13 @@ export const findApplicableSchemes = async (problem: MedicalProblem | null, user
     : `Find a comprehensive list of major general Indian Government Health Schemes (e.g., Ayushman Bharat PM-JAY, National Health Mission, Jan Aushadhi, Rashtriya Swasthya Bima Yojana) available to citizens of all ages.`;
 
   try {
-    const searchResponse = await ai.models.generateContent({
+    const searchResponse = await withRetry(() => ai.models.generateContent({
       model: 'gemini-3-pro-preview',
       contents: searchPrompt,
       config: {
         tools: [{ googleSearch: {} }],
       },
-    });
+    }));
 
     const infoText = searchResponse.text;
     const groundingChunks = searchResponse.candidates?.[0]?.groundingMetadata?.groundingChunks;
@@ -83,7 +169,7 @@ export const findApplicableSchemes = async (problem: MedicalProblem | null, user
       }
     `;
 
-    const parseResponse = await ai.models.generateContent({
+    const parseResponse = await withRetry(() => ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: parsePrompt,
       config: {
@@ -95,6 +181,7 @@ export const findApplicableSchemes = async (problem: MedicalProblem | null, user
             properties: {
               id: { type: Type.STRING },
               name: { type: Type.STRING },
+              location: { type: Type.STRING },
               benefits: { type: Type.STRING },
               coverageAmount: { type: Type.STRING },
               eligibility: { type: Type.STRING },
@@ -106,7 +193,7 @@ export const findApplicableSchemes = async (problem: MedicalProblem | null, user
           }
         }
       }
-    });
+    }));
 
     const schemes: any[] = JSON.parse(parseResponse.text || "[]");
     return schemes.map(s => ({

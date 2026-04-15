@@ -25,6 +25,16 @@ export interface GovernmentScheme {
   applicationSteps?: string[];
 }
 
+export interface HospitalRecommendation {
+  id: string;
+  name: string;
+  location: string;
+  specialty: string;
+  highlights: string[];
+  rating?: string;
+  officialLinks: { title: string; uri: string }[];
+}
+
 export interface Insurance {
   id: string;
   provider: string;
@@ -69,6 +79,7 @@ export interface UserProfile {
   profilePicture?: string; // Base64 encoded string
   specialization?: string;
   licenseNumber?: string;
+  clinicName?: string;
   emergencyContactName?: string;
   emergencyContactPhone?: string;
   isPremium?: boolean;
@@ -76,6 +87,7 @@ export interface UserProfile {
   subscriptionExpiry?: string;
   visitingHours?: VisitingHours;
   notificationSettings?: NotificationSettings;
+  biometricEnabled?: boolean;
 }
 
 export interface MedicalProblem {
@@ -89,6 +101,7 @@ export interface MedicalProblem {
   treatment?: string;
   notes?: string;
   applicableSchemes?: GovernmentScheme[];
+  applicableHospitals?: HospitalRecommendation[];
   treatmentProvider?: string;
   prescriptionDetails?: string;
 }
